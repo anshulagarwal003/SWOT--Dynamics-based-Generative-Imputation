@@ -1,0 +1,33 @@
+[build-system]
+requires = ["setuptools>=68", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "ssh-spectral-clustering"
+version = "0.1.0"
+description = "Wavenumber-frequency spectral clustering of sea surface height (SSH) into oceanographic wave regimes"
+readme = "README.md"
+requires-python = ">=3.10"
+license = { text = "MIT" }
+dependencies = [
+    "numpy>=1.24",
+    "pandas>=2.0",
+    "scipy>=1.10",
+    "scikit-learn>=1.3",
+    "matplotlib>=3.7",
+    "netCDF4>=1.6",
+    "cartopy>=0.22",
+]
+
+[project.optional-dependencies]
+dev = ["pytest>=7.4"]
+notebooks = ["jupyter", "notebook"]
+
+[project.scripts]
+ssh-clustering = "ssh_clustering.cli:main"
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
