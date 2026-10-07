@@ -1,0 +1,160 @@
+% ============================================================
+% 3D U-Net architecture diagram (baseline reconstruction model)
+% Standard symmetric "U" layout: encoder descends on the left,
+% bottleneck at the bottom, decoder ascends on the right, with
+% horizontal skip connections crossing the middle.
+%
+% For the plain U-Net baseline (Fig. 9): delete the "TIMESTEP
+% EMBEDDING" node/arrows block below (clearly marked).
+% For the diffusion denoiser (Fig. 10): keep everything.
+% ============================================================
+\documentclass[tikz,border=6pt]{standalone}
+\usepackage{tikz}
+\usetikzlibrary{arrows.meta,positioning,fit,backgrounds,calc}
+
+\begin{document}
+
+% ---- color scheme -------------------------------------------------
+\definecolor{encCol}{RGB}{198,219,239}   % light blue   - encoder blocks
+\definecolor{midCol}{RGB}{253,208,162}   % light orange - bottleneck
+\definecolor{decCol}{RGB}{199,233,192}   % light green  - decoder blocks
+\definecolor{ioCol}{RGB}{230,230,230}    % light gray   - in/out conv
+\definecolor{skipCol}{RGB}{110,110,110}  % skip connection arrows
+\definecolor{tCol}{RGB}{204,102,0}       % timestep embedding arrows
+
+\begin{tikzpicture}[
+    font=\small,
+    block/.style={
+        rectangle, draw=black, thick, rounded corners=2pt,
+        minimum width=2.6cm, minimum height=1.1cm,
+        align=center, inner sep=3pt
+    },
+    io/.style={block, fill=ioCol, minimum width=2.2cm},
+    enc/.style={block, fill=encCol},
+    mid/.style={block, fill=midCol, minimum width=2.3cm},
+    dec/.style={block, fill=decCol},
+    samp/.style={
+        rectangle, draw=black, thin, rounded corners=1pt,
+        minimum width=1.5cm, minimum height=0.8cm,
+        align=center, inner sep=2pt, fill=white, font=\scriptsize
+    },
+    mainflow/.style={-{Stealth[length=2.2mm]}, thick},
+    skipflow/.style={-{Stealth[length=2mm]}, thick, dashed, draw=skipCol},
+    tflow/.style={-{Stealth[length=1.8mm]}, thin, draw=tCol},
+    lvllabel/.style={font=\scriptsize\itshape, text=black!60}
+]
+
+% ============================================================
+% Column x-positions: encoder col, downsample col, mid col,
+% upsample col, decoder col. Rows go top (y=0) to bottom (y=-9),
+% forming the two legs of the U with the bottleneck between them.
+% ============================================================
+
+% ---- Row 0: input / output, level 0 (full resolution) --------------
+\node[io]  (inconv)  at (0, 0)     {In Conv \\ \scriptsize $1{\times}1{\times}1$};
+\node[enc] (enc1)    at (3.2, 0)   {enc1 \\ \scriptsize base $\to$ base};
+\node[dec] (dec1)    at (12.8, 0)  {dec1 \\ \scriptsize 3base $\to$ base};
+\node[io]  (outconv) at (16, 0)    {Out Conv \\ \scriptsize GN+SiLU, $1{\times}1{\times}1$};
+
+% ---- Row 1: level 1 (1/2 resolution) --------------------------------
+\node[enc] (enc2)    at (3.2, -2.4)   {enc2 \\ \scriptsize base $\to$ 2base};
+\node[dec] (dec2)    at (12.8, -2.4)  {dec2 \\ \scriptsize 6base $\to$ 2base};
+
+% ---- Row 2: level 2 (1/4 resolution) --------------------------------
+\node[enc] (enc3)    at (3.2, -4.8)   {enc3 \\ \scriptsize 2base $\to$ 4base};
+\node[dec] (dec3)    at (12.8, -4.8)  {dec3 \\ \scriptsize 8base $\to$ 4base};
+
+% ---- Row 3: bottleneck (1/8 resolution) -----------------------------
+\node[mid] (mid1) at (6.4, -7.2)  {mid1 \\ \scriptsize 4base $\to$ 4base};
+\node[mid] (mid2) at (9.6, -7.2)  {mid2 \\ \scriptsize 4base $\to$ 4base};
+
+% ---- Downsample / Upsample connector nodes (between rows) ----------
+\node[samp] (down1) at (3.2, -1.2) {Downsample \\ (space) $\times\frac12$};
+\node[samp] (down2) at (3.2, -3.6) {Downsample \\ (space) $\times\frac12$};
+\node[samp] (down3) at (4.8, -6.0) {Downsample \\ (space) $\times\frac12$};
+
+\node[samp] (up3) at (11.2, -6.0) {Upsample \\ (space) $\times 2$};
+\node[samp] (up2) at (12.8, -3.6) {Upsample \\ (space) $\times 2$};
+\node[samp] (up1) at (12.8, -1.2) {Upsample \\ (space) $\times 2$};
+
+% ============================================================
+% Main forward flow — left leg (encoder) down, bottleneck across,
+% right leg (decoder) up. This traces the literal "U" shape.
+% ============================================================
+\draw[mainflow] (inconv) -- (enc1);
+\draw[mainflow] (enc1)   -- (down1);
+\draw[mainflow] (down1)  -- (enc2);
+\draw[mainflow] (enc2)   -- (down2);
+\draw[mainflow] (down2)  -- (enc3);
+\draw[mainflow] (enc3)   -- (down3);
+\draw[mainflow] (down3)  -- (mid1);
+\draw[mainflow] (mid1)   -- (mid2);
+\draw[mainflow] (mid2)   -- (up3);
+\draw[mainflow] (up3)    -- (dec3);
+\draw[mainflow] (dec3)   -- (up2);
+\draw[mainflow] (up2)    -- (dec2);
+\draw[mainflow] (dec2)   -- (up1);
+\draw[mainflow] (up1)    -- (dec1);
+\draw[mainflow] (dec1)   -- (outconv);
+
+% ============================================================
+% Skip connections — straight horizontal dashed arrows crossing
+% the middle of the U, the conventional way to draw them.
+% ============================================================
+\draw[skipflow] (enc1.east) -- (dec1.west)
+    node[midway, above, font=\tiny, text=skipCol] {skip (concat)};
+\draw[skipflow] (enc2.east) -- (dec2.west)
+    node[midway, above, font=\tiny, text=skipCol] {skip (concat)};
+\draw[skipflow] (enc3.east) -- (dec3.west)
+    node[midway, above, font=\tiny, text=skipCol] {skip (concat)};
+
+% ============================================================
+% Resolution labels along the left margin
+% ============================================================
+\node[lvllabel, anchor=east] at (-1.4, 0)    {full res.};
+\node[lvllabel, anchor=east] at (-1.4, -2.4) {$\times\frac12$};
+\node[lvllabel, anchor=east] at (-1.4, -4.8) {$\times\frac14$};
+\node[lvllabel, anchor=east] at (-1.4, -7.2) {$\times\frac18$};
+
+% ============================================================
+% TIMESTEP EMBEDDING BLOCK — diffusion denoiser only.
+% Delete this node and the 8 tflow arrows below for the plain
+% U-Net baseline (Figure 9).
+% ============================================================
+\node[block, fill=tCol!15, draw=tCol, minimum width=4cm] (temb) at (8, 2.2)
+    {Timestep $\tau$ \\ \scriptsize sinusoidal embed $\to$ MLP};
+
+\draw[tflow] (temb.west) .. controls +(-2,0) and +(0,1.6) .. (enc1.north);
+\draw[tflow] (temb.west) .. controls +(-1,0) and +(0,1.6) .. (enc2.north);
+\draw[tflow] (temb.south) .. controls +(-0.5,-1) and +(0.6,1.2) .. (enc3.north);
+\draw[tflow] (temb.south) -- (mid1.north);
+\draw[tflow] (temb.south) -- (mid2.north);
+\draw[tflow] (temb.south) .. controls +(0.5,-1) and +(-0.6,1.2) .. (dec3.north);
+\draw[tflow] (temb.east) .. controls +(1,0) and +(0,1.6) .. (dec2.north);
+\draw[tflow] (temb.east) .. controls +(2,0) and +(0,1.6) .. (dec1.north);
+
+% ============================================================
+% Legend
+% ============================================================
+\begin{scope}[shift={(0,-9.6)}, every node/.style={font=\scriptsize}]
+    \node[enc, minimum width=1cm, minimum height=0.55cm] (leg1) at (0,0) {};
+    \node[right=2pt of leg1] {Encoder block};
+
+    \node[mid, minimum width=1cm, minimum height=0.55cm] (leg2) at (3.6,0) {};
+    \node[right=2pt of leg2] {Bottleneck block};
+
+    \node[dec, minimum width=1cm, minimum height=0.55cm] (leg3) at (7.4,0) {};
+    \node[right=2pt of leg3] {Decoder block};
+
+    \node[io, minimum width=1cm, minimum height=0.55cm] (leg4) at (10.9,0) {};
+    \node[right=2pt of leg4] {In/out conv};
+
+    \draw[skipflow] (0,-0.9) -- (1,-0.9);
+    \node[right=2pt] at (1,-0.9) {Skip connection (concat)};
+
+    \draw[tflow] (5.6,-0.9) -- (6.6,-0.9);
+    \node[right=2pt] at (6.6,-0.9) {Timestep embedding (diffusion denoiser only)};
+\end{scope}
+
+\end{tikzpicture}
+\end{document}

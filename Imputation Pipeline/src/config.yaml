@@ -1,0 +1,60 @@
+# ── Data ──────────────────────────────────────────────────────────────────────
+data:
+  # Path to the raw per-location SSH time series (.npy files). The raw data
+  # is too large to host in this repository; see data/README.md for the
+  # download link. Set this to wherever you extract it locally.
+  folder: "./data/raw_ssh"
+  train_ratio: 0.70
+  val_ratio: 0.15
+  # test_ratio is implicitly 1 - train_ratio - val_ratio = 0.15
+
+  # Pre-computed statistics over the full training set (SSH anomaly, normalized)
+  global_mean:  0.000000
+  global_std:   0.113065
+
+# ── Checkpoints ───────────────────────────────────────────────────────────────
+checkpoints:
+  dir: "./checkpoints/local"  # new checkpoints saved here during training;
+                               # the selected best checkpoints used in the
+                               # paper are archived under checkpoints/best_models/
+
+# ── W&B ───────────────────────────────────────────────────────────────────────
+wandb:
+  project: "swot-unet_linear_gt_23_unet"
+
+# ── Sweep (UNet) ──────────────────────────────────────────────────────────────
+sweep:
+  method: "random"
+  metric:
+    name: "val_loss"
+    goal: "minimize"
+  count: 20
+  parameters:
+    optimizer:   {value: "adamW"}
+    base:        {values: [8,16]}
+    epochs:      {value: 200}
+    lr:          {values: [1.0e-3, 5.0e-4]}
+    batch_size:  {values: [128]}
+    kT:          {values: [3, 5]}
+    chunk_size:  {values: [5, 10,21]}
+    grad_loss_weight: {values: [0]}
+    mse_weight:  {values: [1.0]}
+
+# ── Sweep (Diffusion) ─────────────────────────────────────────────────────────
+sweep_diffusion:
+  method: "random"
+  metric:
+    name: "val_loss"
+    goal: "minimize"
+  count: 20
+  parameters:
+    optimizer:   {value: "adamW"}
+    base:        {values: [8,16]}
+    epochs:      {value: 500}
+    lr:          {values: [1.0e-4, 3.0e-4]}
+    batch_size:  {values: [128]}
+    kT:          {values: [3,5]}
+    chunk_size:  {values: [5,10,21]}
+    timesteps:   {value: 1000}
+    t_dim:       {value: 128}
+    spectral_lambda: {values: [0] }   # 0.0 = spectral loss off; try 0.01-0.1 to enable

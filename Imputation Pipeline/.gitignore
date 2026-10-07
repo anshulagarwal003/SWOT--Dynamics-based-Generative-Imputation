@@ -1,0 +1,10 @@
+__pycache__/
+*.pyc
+.ipynb_checkpoints/
+.DS_Store
+wandb/
+checkpoints/local/
+*.pt.tmp
+.env
+*.egg-info/
+build/

@@ -1,0 +1,13 @@
+case_name,chunk_size,lat,lon,start,end,mean_crps,date_start,date_end,rows_folder
+extreme_chunk5_summer_min,5,70.660629,-0.213028,335,340,0.04256903752684593,2012-08-13,2012-08-17,extreme_chunk5_summer_min_replot_rows
+extreme_chunk5_summer_max,5,-71.216316,-53.046265,15,20,4.183540423711141,2011-09-28,2011-10-02,extreme_chunk5_summer_max_replot_rows
+extreme_chunk5_winter_min,5,-68.928383,-113.010414,200,205,0.0413741742571195,2012-03-31,2012-04-04,extreme_chunk5_winter_min_replot_rows
+extreme_chunk5_winter_max,5,-75.574257,-165.651382,155,160,4.059928814570109,2012-02-15,2012-02-19,extreme_chunk5_winter_max_replot_rows
+extreme_chunk10_summer_min,10,-52.006847,-89.010414,0,10,0.05520157259888947,2011-09-13,2011-09-22,extreme_chunk10_summer_min_replot_rows
+extreme_chunk10_summer_max,10,-73.433556,-166.559235,40,50,6.0656930804252625,2011-10-23,2011-11-01,extreme_chunk10_summer_max_replot_rows
+extreme_chunk10_winter_min,10,-61.508057,6.989578,170,180,0.050210685934871435,2012-03-01,2012-03-10,extreme_chunk10_winter_min_replot_rows
+extreme_chunk10_winter_max,10,-75.355705,-159.614578,140,150,3.7222697734832764,2012-01-31,2012-02-09,extreme_chunk10_winter_max_replot_rows
+extreme_chunk21_summer_min,21,-48.374134,-143.010422,0,21,0.08297883111395334,2011-09-13,2011-10-03,extreme_chunk21_summer_min_replot_rows
+extreme_chunk21_summer_max,21,-66.662788,-47.010422,21,42,3.4857644909306575,2011-10-04,2011-10-24,extreme_chunk21_summer_max_replot_rows
+extreme_chunk21_winter_min,21,-58.574665,12.989578,126,147,0.07271911301895191,2012-01-17,2012-02-06,extreme_chunk21_winter_min_replot_rows
+extreme_chunk21_winter_max,21,-75.355705,-159.614578,126,147,5.50101029245477,2012-01-17,2012-02-06,extreme_chunk21_winter_max_replot_rows

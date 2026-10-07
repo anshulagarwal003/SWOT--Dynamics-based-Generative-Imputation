@@ -1,0 +1,21 @@
+name: ssha-diffusion
+channels:
+  - pytorch
+  - conda-forge
+  - defaults
+dependencies:
+  - python=3.9
+  - pip
+  - numpy
+  - scipy
+  - pandas
+  - matplotlib
+  - pyyaml
+  - tqdm
+  - pip:
+      - torch>=2.0
+      - wandb
+      - xarray
+      - xrft
+      - scikit-image
+      - cartopy
